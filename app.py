@@ -9,14 +9,15 @@ app = Flask(__name__)
 
 def process_input(ticker):
     data = get_data(ticker)
-    recent = data.tail(1)
+    recent = data.iloc[-1]
     open = recent["open"]
     close = recent["close"]
     ret = "This is the stock data for " + ticker + "\n"
-    ret += f"Most recent open price: {open}, Most recent close price: {close}"
+    ret += f"Most recent open price: {open}.\n Most recent close price: {close}."
     return ret
 
 @app.route('/')
+
 def index():
     return render_template('index.html')
 
