@@ -3,6 +3,26 @@
   <head>
     <meta charset="utf-8">
     <title>Investment Recs</title>
+    <script>
+        function submitForm(event) {
+            event.preventDefault();  // Prevent the default form submission
+            
+            // Get the form data
+            const formData = new FormData(document.querySelector('form'));
+            
+            // Send data to the server
+            fetch('/process', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())  // Parse the JSON response
+            .then(data => {
+                // Display the result
+                document.getElementById('result').innerText = data.result;
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    </script>
   </head>
   <body>
     <h1>i love charli xcx</h1>
@@ -11,8 +31,10 @@
     <h4>i love clairo</h4>
     <h5>i love imagine dragons</h5>
 
-    <form action = "" target = "_top">
-        <label for="stock">Stock:</label>
+    <form onsubmit = "submitForm(event)">
+        <label for="stock">Stock Ticker:</label>
         <input type="text" id="stock" name="stock" placeholder="Enter Ticker"><br><br>
+        <button type="submit">Submit</button>
     </form>
+    <p id="result"></p>
   </body>

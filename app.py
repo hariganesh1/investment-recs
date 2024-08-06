@@ -6,17 +6,23 @@ from yahoo_fin.stock_info import get_data
 
 app = Flask(__name__)
 
-@app.route('/')
 
-def get_stock_data(ticker):
+def process_input(ticker):
     data = get_data(ticker)
     recent = data.tail(1)
-    open = data["open"]
-    close = data["close"]
-    return [open, close]
+    open = recent["open"]
+    close = recent["close"]
+    ret = "This is the stock data for " + ticker + "\n"
+    ret += f"Most recent open price: {open}, Most recent close price: {close}"
+    return ret
 
+@app.route('/')
 def index():
     return render_template('index.html')
 
+@app.route('/process', methods=['POST'])
+
 def process():
-    input = request.form.get()
+    input = request.form.get("stock")
+    result = process_input(input)
+    return jsonify(result=result)
