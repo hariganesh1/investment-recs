@@ -11,7 +11,7 @@ from scraper import scrape_stock_data
 from scraper import scrape_urls 
 from scraper import scrape_text
 
-from old_model import analyze
+from model import analyze
 # from old_model import analyze_without_preprocess
 ## Driver Code. Input from Cmd Line. 
 
@@ -36,6 +36,11 @@ driver = webdriver.Chrome(
     options=options,
 )
 driver.set_window_size(1000, 1000)
+
+# Function for the frontend stuff
+
+def get_data():
+    return scrape_stock_data(driver, ticker)
 
 stock_data = [] # List of stock data dictionaries
 urls_array = [] # List of all the URLs listed in the Yahoo Finance Quote website
