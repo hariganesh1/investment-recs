@@ -14,14 +14,17 @@ def scrape_stock_data(driver, ticker):
     url = f'https://finance.yahoo.com/quote/{ticker}'
     driver.get(url)
 
-    market_price = driver.find_element(By.CSS_SELECTOR, f'fin-streamer[data-symbol={ticker}][data-field="regularMarketPreviousClose"]')\
-        .get_attribute("data-value")
+    price_selector = f'fin-streamer[data-symbol="{ticker}"][data-field="regularMarketPreviousClose"]'
+    price_element = driver.find_element(By.CSS_SELECTOR, price_selector)
+    market_price = price_element.get_attribute("data-value")
 
-    market_open = driver.find_element(By.CSS_SELECTOR, f'fin-streamer[data-symbol={ticker}][data-field="regularMarketOpen"]')\
-        .get_attribute("data-value")
+    open_selector = f'fin-streamer[data-symbol="{ticker}"][data-field="regularMarketOpen"]'
+    open_element = driver.find_element(By.CSS_SELECTOR, open_selector)
+    market_open = open_element.get_attribute("data-value")
 
-    day_range = driver.find_element(By.CSS_SELECTOR, f'fin-streamer[data-symbol={ticker}][data-field="regularMarketDayRange"]')\
-        .get_attribute("data-value")
+    range_selector = f'fin-streamer[data-symbol="{ticker}"][data-field="regularMarketDayRange"]'
+    range_element = driver.find_element(By.CSS_SELECTOR, range_selector)
+    day_range = range_element.get_attribute("data-value")
 
     # Add info to dictionary with stocks 
     stockInfo = {'ticker' : ticker}
@@ -33,8 +36,9 @@ def scrape_stock_data(driver, ticker):
 
     return stockInfo
 
-## Helper method to get the top 5 URLs related to the stock from yahoo finance
-def scrape_urls(ticker): 
+print(scrape_stock_data(webdriver.Chrome(ChromeDriverManager().install()), "AAPL"))
+## Helper method to get the top URLs and related to the stock from yahoo finance
+def scrape_articles(ticker): 
     # print("urls")
     # print(ticker)
     # Set up URL with BeautifulSoup
@@ -45,21 +49,25 @@ def scrape_urls(ticker):
     # Get all the articles pertaining to the stock
     links = soup.find_all("a", class_="subtle-link fin-size-small thumb yf-13p9sh2")
 
+    articles = {}
     urls = []
-    
+    titles = []
     index = 0
     websites = True
-    '''index < 5 and''' 
+
     while websites and index < len(links): # Retrieves the first five links
         link = links[index]
         index += 1
         url = link["href"] # Retrieves URLs; they're marked with href
+        title = link["title"] # Retrieves the title of the article
         if "a.beap.gemini.yahoo" in url:
             websites = False
         else:
             urls.append(url)
+            titles.append(title)
+            articles[title] = url
 
-    return urls
+    return articles
 
 ## Scrape the text from the first five URLs from the ticker's website
 def scrape_text(url):
