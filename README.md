@@ -1,0 +1,1 @@
+Web application that provides information about stocks in your portfolio & gives the sentiments of current news on the stock.

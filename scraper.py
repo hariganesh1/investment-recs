@@ -36,7 +36,7 @@ def scrape_stock_data(driver, ticker):
 
     return stockInfo
 
-print(scrape_stock_data(webdriver.Chrome(ChromeDriverManager().install()), "AAPL"))
+# print(scrape_stock_data(webdriver.Chrome(ChromeDriverManager().install()), "AAPL"))
 ## Helper method to get the top URLs and related to the stock from yahoo finance
 def scrape_articles(ticker): 
     # print("urls")

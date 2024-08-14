@@ -12,56 +12,49 @@ from scraper import scrape_articles
 from scraper import scrape_text
 
 from model import analyze
-## Driver Code. Input from Cmd Line. 
 
-if (len(sys.argv) <= 1):
-    print("Input Ticket Symbol To Extract!")
-    print("Eg. Correct Usage: python main.py NVDA AAPL AMZN for Nvidia, Apple, and Amazon respectively")
-    sys.exit(2)
-ticker = sys.argv[1]
+BRIGHT_CYAN = '\033[96m'
+BRIGHT_MAGENTA = '\033[95m'
+RESET = '\033[0m' # called to return to standard terminal text color
 
-# Options
-options = Options()
-options.headless = True
+# Usage is on ONE stock
+def womptrompolis(ticker):
+    options = Options()
+    options.headless = True
 
-# Initialize driver with website
-# url = f'https://finance.yahoo.com/quote/{ticker_symbol}'
+    # Initialize Driver
+    driver = driver = webdriver.Chrome(
+        service=ChromeService(ChromeDriverManager().install()),
+        options=options,
+    )
+    driver.set_window_size(1000, 1000)
 
-driver = webdriver.Chrome(
-    service=ChromeService(ChromeDriverManager().install()),
-    options=options,
-)
-driver.set_window_size(1000, 1000)
+    # Store the information:
+    ret = [] # Ticker: [Articles, Scores]
+    all_articles = {}   # Title of Article: URL
 
-# Function for the frontend stuff
+    # Omit quantitative data because available through yahoo_fin lib
 
-def get_data():
-    return scrape_stock_data(driver, ticker)
+    # Articles
+    articles = scrape_articles(ticker)
 
-stock_data = [] # List of stock data dictionaries
-scoreDict = {} # Scores of each URL
-articles = {} # Title of Article -> URL
-all_urls = []
-
-for ticker in sys.argv[1:]:
-    stock_data.append(scrape_stock_data(driver, ticker))
-    urls = scrape_articles(ticker)
+    # Text from each of them
     text = ""
-    for title in urls.keys():
-        text += scrape_text(urls[title])
-    all_urls.append(urls)
+    for title in articles:
+        text += scrape_text(articles[title])
+    
+    # Analyze text + record
+    score = analyze(text)
+    ret.append(score)
+    ret.append(articles)
 
-    score = analyze(text) # Preprocesses, records sentiment
-    scoreDict[ticker] = score
+
+    # Close the driver
+    driver.quit()
+    return ret
 
 
 
-print("stock data scraper: \n")
-for data in stock_data:
-    print(data)
-print("stock scores: ")
-for score in scoreDict:
-    print("stock: ", score, "corresponding score: ", scoreDict[score])
-
-driver.quit()
-
+tsla = "TSLA"
+five_tickers = "AMZN AAPL GOOGL MSFT TSLA" # Change later
+# womptrompolis(tsla)
