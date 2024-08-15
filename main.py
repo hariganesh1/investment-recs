@@ -51,6 +51,7 @@ def womptrompolis(ticker):
 
     # Close the driver
     driver.quit()
+    print(ret)
     return ret
 
 

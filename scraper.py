@@ -36,7 +36,6 @@ def scrape_stock_data(driver, ticker):
 
     return stockInfo
 
-# print(scrape_stock_data(webdriver.Chrome(ChromeDriverManager().install()), "AAPL"))
 ## Helper method to get the top URLs and related to the stock from yahoo finance
 def scrape_articles(ticker): 
     # print("urls")
@@ -49,7 +48,7 @@ def scrape_articles(ticker):
     # Get all the articles pertaining to the stock
     links = soup.find_all("a", class_="subtle-link fin-size-small thumb yf-13p9sh2")
 
-    articles = {}
+    articles = {} # Title -> url
     urls = []
     titles = []
     index = 0
@@ -71,7 +70,10 @@ def scrape_articles(ticker):
 
 ## Scrape the text from the first five URLs from the ticker's website
 def scrape_text(url):
-    page = requests.get(url)
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
+    }
+    page = requests.get(url, headers=headers)
     soup = BeautifulSoup(page.content, "html.parser")
     paras = soup.find_all("p")
     text = ''
@@ -79,7 +81,4 @@ def scrape_text(url):
         text += para.get_text()
     
     return text
-
-
-
 

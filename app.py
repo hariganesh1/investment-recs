@@ -1,23 +1,13 @@
 from flask import Flask, render_template, request, jsonify
 from yahoo_fin.stock_info import get_data
 from datetime import datetime
-import pytz
-from main import womptrompolis
+from scraper import scrape_articles
+from scraper import scrape_text
+from sentiment import get_sentiment
 
-
-# from main import get_data
 
 app = Flask(__name__)
 
-
-
-# Format of this can be like:
-# AAPL
-
-# - (either today's if it's after 5pm in ur time OR yday's) open price: $xx
-# - (either today's if it's after 5pm in ur time OR yday's) close price: $xx
-# - Here are the articles listed on yahoo finance: {article titles w/url's embedded in them}
-# - NLTK's thoughts on their sentiment 
 
 
 
@@ -26,27 +16,36 @@ def process_input(ticker):
     # Quantitative Data
     data = get_data(ticker)
     recent = data.iloc[-1]
-    open = recent["open"]
-    close = recent["close"]
+    open = round(recent["open"], 2)
+    close = round(recent["close"], 2)
     ret = f"{ticker}\n"
-    ret += f"The most recent open price (today if it's after 4:30 PM EST or yesterday's if before then) is {open}.\n"
-    ret += f"The most recent close price (today if it's after 4:30 PM EST or yesterday's if before then) is {close}.\n"
+    ret += f"The most recent open price (today if it's after 4:30 PM EST or yesterday's if before then) is ${open}.\n"
+    ret += f"The most recent close price (today if it's after 4:30 PM EST or yesterday's if before then) is ${close}.\n"
 
-    data = womptrompolis(ticker)
-    # data[0] is overall sentiment score
-    # data[1] is a dictionary of titles to URLs
+    articles = scrape_articles(ticker)
 
-    if data[0]['neg'] > data[0]['pos'] and data[0]['neg'] > data[0]['neu']:
-        ret += f"Recent news reflects mostly negative sentiment on this stock, with a {data[0]['neg']} negativity score.\n"
-    elif data[0]['pos'] > data[0]['neg'] and data[0]['pos'] > data[0]['neu']:
-        ret += f"Recent news reflects mostly positive sentiment on this stock, with a {data[0]['pos']} positivity score.\n"
-    else:
-        ret += f"Recent news reflects mostly neutral sentiment on this stock, with a {data[0]['neu']} neutral score.\n"
+    # Maybe do sentiment of EACH article but that takes a while
+    ret += f"This is the most recent news about {ticker}:\n"
+    urls = []
+    text = ""
+    for article in articles:
+        ret += f"Article: \"{article}\" --> URL: {articles[article]}\n"
+        urls.append(articles[article])
+    for url in urls:
+        text += scrape_text(url)
+    ret += "This is the sentiment analysis of the news:\n"
+    ret += get_sentiment(ticker, text)
+
     return ret
 
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
 
 def index():
+    ticker = None
+    if request.method == 'POST':
+        ticker = request.form.get('stock')
+        articles = scrape_articles(ticker)
+    articles = scrape_articles(ticker)
     return render_template('index.html')
 
 @app.route('/process', methods=['POST'])
